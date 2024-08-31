@@ -1,6 +1,7 @@
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
+from emotion_graph import EmotionGraph
 
 emotional_history = [
     [0.8, 0.2, 0.3, 0.1, 0.6],  # Состояние 1
@@ -53,6 +54,8 @@ input_shape = (5, 5)  # timesteps=5, features=5
 lstm_units = 32
 model = EmotionalStabilityModel(input_shape, lstm_units)
 X_train, y_train = model.prepare_data(emotional_history)
+emotion_graph = EmotionGraph()
+joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
 
 # Обучение модели
 model.train(X_train, y_train, epochs=100, batch_size=32)
