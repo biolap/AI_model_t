@@ -1,189 +1,134 @@
-from fuzzylogic import FuzzyVariable, FuzzySet, FuzzyRule, FuzzySystem
-from fuzzylogic.functions import TriangularMF
-
+import numpy as np
+import skfuzzy as fuzz
+from skfuzzy import control as ctrl
 
 class EmotionalRangeModel:
     def __init__(self, emotional_state):
-        # Определение лингвистических переменных для интенсивности стимула
-        self.stimulus_intensity = FuzzyVariable(
-            universe=(0, 1),
-            terms={
-                "Низкая": FuzzySet(function=TriangularMF(0, 0, 0.5)),
-                "Средняя": FuzzySet(function=TriangularMF(0.25, 0.5, 0.75)),
-                "Высокая": FuzzySet(function=TriangularMF(0.5, 1, 1)),
-            },
-        )
+        # Определение fuzzy-переменных
+        self.stimulus_intensity = ctrl.Antecedent(np.arange(0, 1.1, 0.1), 'stimulus_intensity')
+        self.stimulus_valence = ctrl.Antecedent(np.arange(-1, 1.1, 0.1), 'stimulus_valence')
+        self.joy_intensity = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'joy_intensity')
+        self.sadness_intensity = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'sadness_intensity')
+        self.anger_intensity = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'anger_intensity')
+        self.fear_intensity = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'fear_intensity')
+        self.surprise_intensity = ctrl.Consequent(np.arange(0, 1.1, 0.1), 'surprise_intensity')
 
-        # Определение лингвистических переменных для валентности стимула
-        self.stimulus_valence = FuzzyVariable(
-            universe=(-1, 1),
-            terms={
-                "Отрицательная": FuzzySet(function=TriangularMF(-1, -1, 0)),
-                "Нейтральная": FuzzySet(function=TriangularMF(-0.5, 0, 0.5)),
-                "Положительная": FuzzySet(function=TriangularMF(0, 1, 1)),
-            },
-        )
+        # Определение fuzzy-множеств (membership functions)
+        self.stimulus_intensity['низкая'] = fuzz.trimf(self.stimulus_intensity.universe, [0, 0, 0.5])
+        self.stimulus_intensity['средняя'] = fuzz.trimf(self.stimulus_intensity.universe, [0.25, 0.5, 0.75])
+        self.stimulus_intensity['высокая'] = fuzz.trimf(self.stimulus_intensity.universe, [0.5, 1, 1])
 
-        # Определение лингвистических переменных для интенсивности эмоций (для каждой эмоции)
-        self.joy_intensity = FuzzyVariable(
-            universe=(0, 1),
-            terms={
-                "Низкая": FuzzySet(function=TriangularMF(0, 0, 0.5)),
-                "Средняя": FuzzySet(function=TriangularMF(0.25, 0.5, 0.75)),
-                "Высокая": FuzzySet(function=TriangularMF(0.5, 1, 1)),
-            },
-        )
-        self.sadness_intensity = FuzzyVariable(
-            universe=(0, 1),
-            terms={
-                "Низкая": FuzzySet(function=TriangularMF(0, 0, 0.5)),
-                "Средняя": FuzzySet(function=TriangularMF(0.25, 0.5, 0.75)),
-                "Высокая": FuzzySet(function=TriangularMF(0.5, 1, 1)),
-            },
-        )
-        self.anger_intensity = FuzzyVariable(
-            universe=(0, 1),
-            terms={
-                "Низкая": FuzzySet(function=TriangularMF(0, 0, 0.5)),
-                "Средняя": FuzzySet(function=TriangularMF(0.25, 0.5, 0.75)),
-                "Высокая": FuzzySet(function=TriangularMF(0.5, 1, 1)),
-            },
-        )
-        self.fear_intensity = FuzzyVariable(
-            universe=(0, 1),
-            terms={
-                "Низкая": FuzzySet(function=TriangularMF(0, 0, 0.5)),
-                "Средняя": FuzzySet(function=TriangularMF(0.25, 0.5, 0.75)),
-                "Высокая": FuzzySet(function=TriangularMF(0.5, 1, 1)),
-            },
-        )
-        self.surprise_intensity = FuzzyVariable(
-            universe=(0, 1),
-            terms={
-                "Низкая": FuzzySet(function=TriangularMF(0, 0, 0.5)),
-                "Средняя": FuzzySet(function=TriangularMF(0.25, 0.5, 0.75)),
-                "Высокая": FuzzySet(function=TriangularMF(0.5, 1, 1)),
-            },
-        )
+        self.stimulus_valence['отрицательная'] = fuzz.trimf(self.stimulus_valence.universe, [-1, -1, 0])
+        self.stimulus_valence['нейтральная'] = fuzz.trimf(self.stimulus_valence.universe, [-0.5, 0, 0.5])
+        self.stimulus_valence['положительная'] = fuzz.trimf(self.stimulus_valence.universe, [0, 1, 1])
 
-        # Определение правил fuzzy logic (для каждой эмоции)
-        # --- Радость (Joy) ---
-        self.rule1_joy = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Высокая"] & self.stimulus_valence["Положительная"]),
-            consequent=self.joy_intensity["Высокая"],
-        )
-        self.rule2_joy = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Средняя"] & self.stimulus_valence["Положительная"]),
-            consequent=self.joy_intensity["Средняя"],
-        )
-        self.rule3_joy = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Низкая"] & self.stimulus_valence["Положительная"]),
-            consequent=self.joy_intensity["Низкая"],
-        )
+        self.joy_intensity['низкая'] = fuzz.trimf(self.joy_intensity.universe, [0, 0, 0.5])
+        self.joy_intensity['средняя'] = fuzz.trimf(self.joy_intensity.universe, [0.25, 0.5, 0.75])
+        self.joy_intensity['высокая'] = fuzz.trimf(self.joy_intensity.universe, [0.5, 1, 1])
 
-        # --- Грусть (Sadness) ---
-        self.rule1_sadness = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Высокая"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.sadness_intensity["Высокая"],
-        )
-        self.rule2_sadness = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Средняя"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.sadness_intensity["Средняя"],
-        )
-        self.rule3_sadness = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Низкая"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.sadness_intensity["Низкая"],
-        )
+        self.sadness_intensity['низкая'] = fuzz.trimf(self.sadness_intensity.universe, [0, 0, 0.5])
+        self.sadness_intensity['средняя'] = fuzz.trimf(self.sadness_intensity.universe, [0.25, 0.5, 0.75])
+        self.sadness_intensity['высокая'] = fuzz.trimf(self.sadness_intensity.universe, [0.5, 1, 1])
 
-        # --- Гнев (Anger) ---
-        self.rule1_anger = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Высокая"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.anger_intensity["Высокая"],
-        )
-        self.rule2_anger = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Средняя"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.anger_intensity["Средняя"],
-        )
-        self.rule3_anger = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Низкая"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.anger_intensity["Низкая"],
-        )
+        self.anger_intensity['низкая'] = fuzz.trimf(self.anger_intensity.universe, [0, 0, 0.5])
+        self.anger_intensity['средняя'] = fuzz.trimf(self.anger_intensity.universe, [0.25, 0.5, 0.75])
+        self.anger_intensity['высокая'] = fuzz.trimf(self.anger_intensity.universe, [0.5, 1, 1])
 
-        # --- Страх (Fear) ---
-        self.rule1_fear = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Высокая"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.fear_intensity["Высокая"],
-        )
-        self.rule2_fear = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Средняя"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.fear_intensity["Средняя"],
-        )
-        self.rule3_fear = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Низкая"] & self.stimulus_valence["Отрицательная"]),
-            consequent=self.fear_intensity["Низкая"],
-        )
+        self.fear_intensity['низкая'] = fuzz.trimf(self.fear_intensity.universe, [0, 0, 0.5])
+        self.fear_intensity['средняя'] = fuzz.trimf(self.fear_intensity.universe, [0.25, 0.5, 0.75])
+        self.fear_intensity['высокая'] = fuzz.trimf(self.fear_intensity.universe, [0.5, 1, 1])
 
-        # --- Удивление (Surprise) ---
-        self.rule1_surprise = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Высокая"] & self.stimulus_valence["Нейтральная"]),
-            consequent=self.surprise_intensity["Высокая"],
-        )
-        self.rule2_surprise = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Средняя"] & self.stimulus_valence["Нейтральная"]),
-            consequent=self.surprise_intensity["Средняя"],
-        )
-        self.rule3_surprise = FuzzyRule(
-            antecedent=(self.stimulus_intensity["Низкая"] & self.stimulus_valence["Нейтральная"]),
-            consequent=self.surprise_intensity["Низкая"],
-        )
+        self.surprise_intensity['низкая'] = fuzz.trimf(self.surprise_intensity.universe, [0, 0, 0.5])
+        self.surprise_intensity['средняя'] = fuzz.trimf(self.surprise_intensity.universe, [0.25, 0.5, 0.75])
+        self.surprise_intensity['высокая'] = fuzz.trimf(self.surprise_intensity.universe, [0.5, 1, 1])
 
-        # Создание системы fuzzy logic
-        self.fuzzy_system = FuzzySystem()
+        # Определение правил fuzzy logic
+        rule1_joy = ctrl.Rule(self.stimulus_intensity['высокая'] & self.stimulus_valence['положительная'], self.joy_intensity['высокая'])
+        rule2_joy = ctrl.Rule(self.stimulus_intensity['средняя'] & self.stimulus_valence['положительная'], self.joy_intensity['средняя'])
+        rule3_joy = ctrl.Rule(self.stimulus_intensity['низкая'] & self.stimulus_valence['положительная'], self.joy_intensity['низкая'])
 
-        # Добавление правил в систему
-        self.fuzzy_system.add_rules(
-            self.rule1_joy, self.rule2_joy, self.rule3_joy,
-            self.rule1_sadness, self.rule2_sadness, self.rule3_sadness,
-            self.rule1_anger, self.rule2_anger, self.rule3_anger,
-            self.rule1_fear, self.rule2_fear, self.rule3_fear,
-            self.rule1_surprise, self.rule2_surprise, self.rule3_surprise,
-        )
+        rule1_sadness = ctrl.Rule(self.stimulus_intensity['высокая'] & self.stimulus_valence['отрицательная'], self.sadness_intensity['высокая'])
+        rule2_sadness = ctrl.Rule(self.stimulus_intensity['средняя'] & self.stimulus_valence['отрицательная'], self.sadness_intensity['средняя'])
+        rule3_sadness = ctrl.Rule(self.stimulus_intensity['низкая'] & self.stimulus_valence['отрицательная'], self.sadness_intensity['низкая'])
 
-        #  Сохранение  emotional_state  как атрибут класса
+        rule1_anger = ctrl.Rule(self.stimulus_intensity['высокая'] & self.stimulus_valence['отрицательная'], self.anger_intensity['высокая'])
+        rule2_anger = ctrl.Rule(self.stimulus_intensity['средняя'] & self.stimulus_valence['отрицательная'], self.anger_intensity['средняя'])
+        rule3_anger = ctrl.Rule(self.stimulus_intensity['низкая'] & self.stimulus_valence['отрицательная'], self.anger_intensity['низкая'])
+
+        rule1_fear = ctrl.Rule(self.stimulus_intensity['высокая'] & self.stimulus_valence['отрицательная'], self.fear_intensity['высокая'])
+        rule2_fear = ctrl.Rule(self.stimulus_intensity['средняя'] & self.stimulus_valence['отрицательная'], self.fear_intensity['средняя'])
+        rule3_fear = ctrl.Rule(self.stimulus_intensity['низкая'] & self.stimulus_valence['отрицательная'], self.fear_intensity['низкая'])
+
+        rule1_surprise = ctrl.Rule(self.stimulus_intensity['высокая'] & self.stimulus_valence['нейтральная'], self.surprise_intensity['высокая'])
+        rule2_surprise = ctrl.Rule(self.stimulus_intensity['средняя'] & self.stimulus_valence['нейтральная'], self.surprise_intensity['средняя'])
+        rule3_surprise = ctrl.Rule(self.stimulus_intensity['низкая'] & self.stimulus_valence['нейтральная'], self.surprise_intensity['низкая'])
+
+        # Создание систем управления
+        self.joy_ctrl = ctrl.ControlSystem([rule1_joy, rule2_joy, rule3_joy])
+        self.sadness_ctrl = ctrl.ControlSystem([rule1_sadness, rule2_sadness, rule3_sadness])
+        self.anger_ctrl = ctrl.ControlSystem([rule1_anger, rule2_anger, rule3_anger])
+        self.fear_ctrl = ctrl.ControlSystem([rule1_fear, rule2_fear, rule3_fear])
+        self.surprise_ctrl = ctrl.ControlSystem([rule1_surprise, rule2_surprise, rule3_surprise])
+
+        # Создание симуляции системы управления
+        self.joy_simulation = ctrl.ControlSystemSimulation(self.joy_ctrl)
+        self.joy_simulation.output['joy_intensity'] = 0.0
+
+        self.sadness_simulation = ctrl.ControlSystemSimulation(self.sadness_ctrl)
+        self.sadness_simulation.output['sadness_intensity'] = 0.0
+
+        self.anger_simulation = ctrl.ControlSystemSimulation(self.anger_ctrl)
+        self.anger_simulation.output['anger_intensity'] = 0.0
+
+        self.fear_simulation = ctrl.ControlSystemSimulation(self.fear_ctrl)
+        self.fear_simulation.output['fear_intensity'] = 0.0
+
+        self.surprise_simulation = ctrl.ControlSystemSimulation(self.surprise_ctrl)
+        self.surprise_simulation.output['surprise_intensity'] = 0.0
+
+        # EmotionalState
         self.emotional_state = emotional_state
 
     def get_emotion_intensity(self, emotion, stimulus_intensity, stimulus_valence):
-        # Установка входных значений для системы fuzzy logic
-        self.stimulus_intensity.value = stimulus_intensity
-        self.stimulus_valence.value = stimulus_valence
-
-        # Вычисление интенсивности эмоции
-        self.fuzzy_system.calculate()
-
-        # Обновление EmotionalState
         if emotion == "joy":
-            self.emotional_state.set_emotion_intensity(0, self.joy_intensity.value)
-        elif emotion == "sadness":
-            self.emotional_state.set_emotion_intensity(1, self.sadness_intensity.value)
-        elif emotion == "anger":
-            self.emotional_state.set_emotion_intensity(2, self.anger_intensity.value)
-        elif emotion == "fear":
-            self.emotional_state.set_emotion_intensity(3, self.fear_intensity.value)
-        elif emotion == "surprise":
-            self.emotional_state.set_emotion_intensity(4, self.surprise_intensity.value)
-        else:
-            raise ValueError(f"Invalid emotion: {emotion}")
+            self.joy_simulation.input['stimulus_intensity'] = stimulus_intensity
+            self.joy_simulation.input['stimulus_valence'] = stimulus_valence
+            
+            # Активация выхода
+            self.joy_simulation.compute() 
+            intensity = self.joy_simulation.output['joy_intensity']
+            self.emotional_state.set_emotion_intensity(0, intensity)
+            return intensity
 
-        # Возвращаем интенсивность 
-        if emotion == "joy":
-            return self.joy_intensity.value
         elif emotion == "sadness":
-            return self.sadness_intensity.value
+            self.sadness_simulation.input['stimulus_intensity'] = stimulus_intensity
+            self.sadness_simulation.input['stimulus_valence'] = stimulus_valence
+            
+            # Активация выхода
+            self.sadness_simulation.compute()
+            intensity = self.sadness_simulation.output['sadness_intensity']
+            self.emotional_state.set_emotion_intensity(1, intensity)
+            return intensity
         elif emotion == "anger":
-            return self.anger_intensity.value
+            self.anger_simulation.input['stimulus_intensity'] = stimulus_intensity
+            self.anger_simulation.input['stimulus_valence'] = stimulus_valence
+            self.anger_simulation.compute()  # !!! ДОБАВЛЕНО
+            intensity = self.anger_simulation.output['anger_intensity']
+            self.emotional_state.set_emotion_intensity(2, intensity)
+            return intensity
         elif emotion == "fear":
-            return self.fear_intensity.value
+            self.fear_simulation.input['stimulus_intensity'] = stimulus_intensity
+            self.fear_simulation.input['stimulus_valence'] = stimulus_valence
+            self.fear_simulation.compute()  # !!! ДОБАВЛЕНО
+            intensity = self.fear_simulation.output['fear_intensity']
+            self.emotional_state.set_emotion_intensity(3, intensity)
+            return intensity
         elif emotion == "surprise":
-            return self.surprise_intensity.value
+            self.surprise_simulation.input['stimulus_intensity'] = stimulus_intensity
+            self.surprise_simulation.input['stimulus_valence'] = stimulus_valence
+            self.surprise_simulation.compute()  # !!! ДОБАВЛЕНО
+            intensity = self.surprise_simulation.output['surprise_intensity']
+            self.emotional_state.set_emotion_intensity(4, intensity)
+            return intensity
         else:
             raise ValueError(f"Invalid emotion: {emotion}")

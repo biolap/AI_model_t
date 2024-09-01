@@ -1,7 +1,7 @@
 from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
-from emotion_graph import EmotionGraph
+from .emotion_graph import EmotionGraph
 
 emotional_history = [
     [0.8, 0.2, 0.3, 0.1, 0.6],  # Состояние 1

@@ -26,11 +26,11 @@ stimulus_intensity = 0.8
 stimulus_valence = 0.6
 
 # 2. EmotionalRangeModel обрабатывает стимул
-emotional_range_model.get_emotion_intensity("joy", stimulus_intensity, stimulus_valence)
-emotional_range_model.get_emotion_intensity("sadness", stimulus_intensity, stimulus_valence)
-emotional_range_model.get_emotion_intensity("anger", stimulus_intensity, stimulus_valence)
-emotional_range_model.get_emotion_intensity("fear", stimulus_intensity, stimulus_valence)
-emotional_range_model.get_emotion_intensity("surprise", stimulus_intensity, stimulus_valence)
+joy_intensity = emotional_range_model.get_emotion_intensity("joy", stimulus_intensity, stimulus_valence)
+sadness_intensity = emotional_range_model.get_emotion_intensity("sadness", stimulus_intensity, stimulus_valence)
+anger_intensity = emotional_range_model.get_emotion_intensity("anger", stimulus_intensity, stimulus_valence)
+fear_intensity = emotional_range_model.get_emotion_intensity("fear", stimulus_intensity, stimulus_valence)
+surprise_intensity = emotional_range_model.get_emotion_intensity("surprise", stimulus_intensity, stimulus_valence)
 
 # 3. TemperamentModel выбирает действие (задаем состояние вручную)
 current_state = [0.5, 0.2, 1]  # Пример вектора состояния
@@ -44,13 +44,17 @@ emotional_history = [
     [0.5, 0.5, 0.0, 0.4, 0.3],
     [0.4, 0.6, 0.1, 0.5, 0.2],
 ]
-emotional_stability = emotional_stability_model.predict_emotional_stability(np.array([emotional_history])) # Преобразование в numpy array
-
+emotional_stability = emotional_stability_model.predict_emotional_stability(np.array([emotional_history]))
 # 5. EmotionGraph определяет влияние эмоций
 joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
 
 # Вывод результатов
 print(f"Вектор эмоционального состояния: {emotional_state.get_vector()}")
+print(f"Интенсивность радости: {joy_intensity}")
+print(f"Интенсивность грусти: {sadness_intensity}")
+print(f"Интенсивность гнева: {anger_intensity}")
+print(f"Интенсивность страха: {fear_intensity}")
+print(f"Интенсивность удивления: {surprise_intensity}")
 print(f"Выбранное действие: {action}")
 print(f"Эмоциональная устойчивость: {emotional_stability}")
 print(f"Влияние радости на страх: {joy_influence_on_fear}")

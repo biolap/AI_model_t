@@ -11,14 +11,19 @@ class TemperamentModel:
         self.q_table = np.zeros((state_size, action_size))
         self.emotional_state = emotional_state
 
+    # def get_action(self, state):
+    #     if random.uniform(0, 1) < self.epsilon:
+    #         # Выбираем случайное действие
+    #         return random.randrange(self.action_size)
+    #     else:
+    #         # Выбираем действие с максимальной оценкой в Q-таблице
+    #         return np.argmax(self.q_table[state, :])
+        
     def get_action(self, state):
+        state = tuple(state)  # Convert state to a tuple of integers
         if random.uniform(0, 1) < self.epsilon:
-            # Выбираем случайное действие
             return random.randrange(self.action_size)
-        else:
-            # Выбираем действие с максимальной оценкой в Q-таблице
-            return np.argmax(self.q_table[state, :])
-
+        return np.argmax(self.q_table[state, :])    
     def update_q_table(self, state, action, reward, next_state):
         # SARSA update
         current_q = self.q_table[state, action]
