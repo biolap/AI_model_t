@@ -1,8 +1,9 @@
-from fuzzylogic.classes import FuzzyVariable, FuzzySet, FuzzyRule, FuzzySystem
+from fuzzylogic import FuzzyVariable, FuzzySet, FuzzyRule, FuzzySystem
 from fuzzylogic.functions import TriangularMF
 
+
 class EmotionalRangeModel:
-    def __init__(self):
+    def __init__(self, emotional_state):
         # Определение лингвистических переменных для интенсивности стимула
         self.stimulus_intensity = FuzzyVariable(
             universe=(0, 1),
@@ -148,6 +149,9 @@ class EmotionalRangeModel:
             self.rule1_surprise, self.rule2_surprise, self.rule3_surprise,
         )
 
+        #  Сохранение  emotional_state  как атрибут класса
+        self.emotional_state = emotional_state
+
     def get_emotion_intensity(self, emotion, stimulus_intensity, stimulus_valence):
         # Установка входных значений для системы fuzzy logic
         self.stimulus_intensity.value = stimulus_intensity
@@ -156,7 +160,21 @@ class EmotionalRangeModel:
         # Вычисление интенсивности эмоции
         self.fuzzy_system.calculate()
 
-        # Получение интенсивности эмоции
+        # Обновление EmotionalState
+        if emotion == "joy":
+            self.emotional_state.set_emotion_intensity(0, self.joy_intensity.value)
+        elif emotion == "sadness":
+            self.emotional_state.set_emotion_intensity(1, self.sadness_intensity.value)
+        elif emotion == "anger":
+            self.emotional_state.set_emotion_intensity(2, self.anger_intensity.value)
+        elif emotion == "fear":
+            self.emotional_state.set_emotion_intensity(3, self.fear_intensity.value)
+        elif emotion == "surprise":
+            self.emotional_state.set_emotion_intensity(4, self.surprise_intensity.value)
+        else:
+            raise ValueError(f"Invalid emotion: {emotion}")
+
+        # Возвращаем интенсивность 
         if emotion == "joy":
             return self.joy_intensity.value
         elif emotion == "sadness":
