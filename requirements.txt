@@ -2,3 +2,4 @@ numpy
 fuzzylogic
 tensorflow
 networkx
+scikit-fuzzy
