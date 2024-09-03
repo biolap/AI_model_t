@@ -1,12 +1,11 @@
 import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
 
 from emotional_module.temperament_model import TemperamentModel
+from emotional_module.emotional_range_model import JoyModel, SadnessModel, AngerModel, FearModel, SurpriseModel
 from emotional_module.emotional_stability_model import EmotionalStabilityModel
 from emotional_module.emotional_state import EmotionalState
 from emotional_module.emotion_graph import EmotionGraph
-from emotional_module.emotional_range_model import JoyModel, SadnessModel
+from emotional_module.visualization import visualize_emotion_graph_3d
 
 # Параметры для TemperamentModel
 state_size = 3
@@ -23,37 +22,37 @@ temperament_model = TemperamentModel(state_size, action_size, learning_rate, dis
 emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 5), lstm_units=32)
 emotion_graph = EmotionGraph()
 
-def visualize_emotion_graph(emotion_graph, emotional_state):
-    """Визуализирует граф эмоций.
+# def visualize_emotion_graph(emotion_graph, emotional_state):
+#     """Визуализирует граф эмоций.
 
-    Args:
-        emotion_graph: Экземпляр класса EmotionGraph.
-        emotional_state: Экземпляр класса EmotionalState.
-    """
-    # Получаем интенсивность эмоций из emotional_state
-    emotion_intensities = {
-        emotion: emotional_state.get_emotion_intensity(i) 
-        for i, emotion in enumerate(emotion_graph.emotions)
-    }
+#     Args:
+#         emotion_graph: Экземпляр класса EmotionGraph.
+#         emotional_state: Экземпляр класса EmotionalState.
+#     """
+#     # Получаем интенсивность эмоций из emotional_state
+#     emotion_intensities = {
+#         emotion: emotional_state.get_emotion_intensity(i) 
+#         for i, emotion in enumerate(emotion_graph.emotions)
+#     }
 
-    # Создаем макет графа
-    pos = nx.spring_layout(emotion_graph.graph)
+#     # Создаем макет графа
+#     pos = nx.spring_layout(emotion_graph.graph)
 
-    # Рисуем узлы с размером,  пропорциональным интенсивности эмоции
-    node_sizes = [intensity * 1000 for intensity in emotion_intensities.values()]
-    nx.draw_networkx_nodes(emotion_graph.graph, pos, node_size=node_sizes, node_color="lightblue")
+#     # Рисуем узлы с размером,  пропорциональным интенсивности эмоции
+#     node_sizes = [intensity * 1000 for intensity in emotion_intensities.values()]
+#     nx.draw_networkx_nodes(emotion_graph.graph, pos, node_size=node_sizes, node_color="lightblue")
 
-    # Рисуем ребра с толщиной,  пропорциональной весу
-    edge_widths = [data['weight'] * 5 for _, _, data in emotion_graph.graph.edges(data=True)]
-    nx.draw_networkx_edges(emotion_graph.graph, pos, width=edge_widths, edge_color="gray")
+#     # Рисуем ребра с толщиной,  пропорциональной весу
+#     edge_widths = [data['weight'] * 5 for _, _, data in emotion_graph.graph.edges(data=True)]
+#     nx.draw_networkx_edges(emotion_graph.graph, pos, width=edge_widths, edge_color="gray")
 
-    # Добавляем метки к узлам
-    nx.draw_networkx_labels(emotion_graph.graph, pos, font_size=10)
+#     # Добавляем метки к узлам
+#     nx.draw_networkx_labels(emotion_graph.graph, pos, font_size=10)
 
-    # Отображаем граф
-    plt.title("Граф эмоций")
-    plt.axis('off')
-    plt.show()
+#     # Отображаем граф
+#     plt.title("Граф эмоций")
+#     plt.axis('off')
+#     plt.show()
 
 # Пример взаимодействия
 # 1. Получение стимула (задаем вручную)
@@ -61,8 +60,23 @@ stimulus_intensity = 0.8
 stimulus_valence = -0.6
 
 # 2. Вычисление интенсивности эмоций
-joy_intensity = joy_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем joy_model
-sadness_intensity = sadness_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем sadness_model
+# joy_intensity = joy_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем joy_model
+# sadness_intensity = sadness_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем sadness_model
+
+joy_model = JoyModel(emotional_state)
+joy_intensity = joy_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
+
+sadness_model = SadnessModel(emotional_state)
+sadness_intensity = sadness_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
+
+anger_model = AngerModel(emotional_state)
+anger_intensity = anger_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
+
+fear_model = FearModel(emotional_state)
+fear_intensity = fear_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
+
+surprise_model = SurpriseModel(emotional_state)
+surprise_intensity = surprise_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
 
 # 3. TemperamentModel выбирает действие (задаем состояние вручную)
 current_state = [0.5, 0.2, 1]  # Пример вектора состояния
@@ -83,12 +97,10 @@ joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
 # Вывод результатов
 print(f"Вектор эмоционального состояния: {emotional_state.get_vector()}")
 print(f"Интенсивность радости: {joy_intensity}")
-print(f"Интенсивность грусти: {sadness_intensity}")  # Выводим sadness
-
-# ... (вывод для других эмоций)
-print(f"Выбранное действие: {action}")
-print(f"Эмоциональная устойчивость: {emotional_stability}")
-print(f"Влияние радости на страх: {joy_influence_on_fear}")
+print(f"Интенсивность грусти: {sadness_intensity}")
+print(f"Интенсивность гнева: {anger_intensity}")
+print(f"Интенсивность страха: {fear_intensity}")
+print(f"Интенсивность удивления: {surprise_intensity}")
 
 # Визуализация
-visualize_emotion_graph(emotion_graph, emotional_state)
+visualize_emotion_graph_3d(emotion_graph, emotional_state)

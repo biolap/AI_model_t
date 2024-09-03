@@ -7,8 +7,11 @@ class EmotionModel:
         self.emotional_state = emotional_state
         self.emotion_name = emotion_name
         self.intensity_name = intensity_name
+        
         self.stimulus_intensity = ctrl.Antecedent(np.arange(0, 1.1, 0.1), 'stimulus_intensity')
         self.stimulus_valence = ctrl.Antecedent(np.arange(-1, 1.1, 0.1), 'stimulus_valence')
+        
+        
         self.intensity = ctrl.Consequent(np.arange(0, 1.1, 0.1), intensity_name)
         # Определение fuzzy-множеств (membership functions)
         for var in [self.stimulus_intensity, self.stimulus_valence]:
@@ -33,7 +36,10 @@ class EmotionModel:
         simulation.input['stimulus_valence'] = stimulus_valence        
         # Устанавливаем все выходные переменные в 0.0
         simulation.output['joy_intensity'] = 0.0
-        simulation.output['sadness_intensity'] = 0.0        
+        simulation.output['sadness_intensity'] = 0.0
+        simulation.output['anger_intensity'] = 0.0
+        simulation.output['fear_intensity'] = 0.0
+        simulation.output['surprise_intensity'] = 0.0
         simulation.compute()
         intensity = simulation.output[self.intensity_name]
         self.emotional_state.set_emotion_intensity(self.emotional_state.emotions.index(self.emotion_name), intensity)
@@ -52,7 +58,10 @@ class JoyModel(EmotionModel):
             ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low']),
             ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['low']),
             ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['low']),
-            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low'])
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['neutral'], self.intensity['low'])
         ]
 # Класс для грусти (Sadness)
 class SadnessModel(EmotionModel):
@@ -66,6 +75,61 @@ class SadnessModel(EmotionModel):
             ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']),
             ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['low']),
             ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['low']),
-            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']) 
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['neutral'], self.intensity['low']) 
         ]
-# ... (добавьте классы для других эмоций)
+# Класс для гнева (Anger)
+class AngerModel(EmotionModel):
+    def __init__(self, emotional_state):
+        super().__init__(emotional_state, "anger", 'anger_intensity')
+
+    def define_rules(self):
+        return [
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['high']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['medium']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['neutral'], self.intensity['low'])
+        ]
+
+# Класс для страха (Fear)
+class FearModel(EmotionModel):
+    def __init__(self, emotional_state):
+        super().__init__(emotional_state, "fear", 'fear_intensity')
+
+    def define_rules(self):
+        return [
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['high']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['medium']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['neutral'], self.intensity['low'])
+        ]
+
+# Класс для удивления (Surprise)
+class SurpriseModel(EmotionModel):
+    def __init__(self, emotional_state):
+        super().__init__(emotional_state, "surprise", 'surprise_intensity')
+
+    def define_rules(self):
+        return [
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['neutral'], self.intensity['high']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['neutral'], self.intensity['medium']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['neutral'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['low']),
+            ctrl.Rule(self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low'])
+        ]
