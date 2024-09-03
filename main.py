@@ -1,7 +1,9 @@
 import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
 
 from emotional_module.temperament_model import TemperamentModel
-from emotional_module.emotional_range_model import EmotionalRangeModel
+from emotional_module.emotional_range_model import EmotionalRangeModel 
 from emotional_module.emotional_stability_model import EmotionalStabilityModel
 from emotional_module.emotional_state import EmotionalState
 from emotional_module.emotion_graph import EmotionGraph
@@ -20,17 +22,46 @@ emotional_range_model = EmotionalRangeModel(emotional_state)
 emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 5), lstm_units=32)
 emotion_graph = EmotionGraph()
 
+def visualize_emotion_graph(emotion_graph, emotional_state):
+    """Визуализирует граф эмоций.
+
+    Args:
+        emotion_graph: Экземпляр класса EmotionGraph.
+        emotional_state: Экземпляр класса EmotionalState.
+    """
+    # Получаем интенсивность эмоций из emotional_state
+    emotion_intensities = {
+        emotion: emotional_state.get_emotion_intensity(i) 
+        for i, emotion in enumerate(emotion_graph.emotions)
+    }
+
+    # Создаем макет графа
+    pos = nx.spring_layout(emotion_graph.graph)
+
+    # Рисуем узлы с размером,  пропорциональным интенсивности эмоции
+    node_sizes = [intensity * 1000 for intensity in emotion_intensities.values()]
+    nx.draw_networkx_nodes(emotion_graph.graph, pos, node_size=node_sizes, node_color="lightblue")
+
+    # Рисуем ребра с толщиной,  пропорциональной весу
+    edge_widths = [data['weight'] * 5 for _, _, data in emotion_graph.graph.edges(data=True)]
+    nx.draw_networkx_edges(emotion_graph.graph, pos, width=edge_widths, edge_color="gray")
+
+    # Добавляем метки к узлам
+    nx.draw_networkx_labels(emotion_graph.graph, pos, font_size=10)
+
+    # Отображаем граф
+    plt.title("Граф эмоций")
+    plt.axis('off')
+    plt.show()
+
 # Пример взаимодействия
 # 1. Получение стимула (задаем вручную)
 stimulus_intensity = 0.8 
 stimulus_valence = 0.6
 
-# 2. EmotionalRangeModel обрабатывает стимул
+# 2. EmotionalRangeModel обрабатывает стимул (только радость)
 joy_intensity = emotional_range_model.get_emotion_intensity("joy", stimulus_intensity, stimulus_valence)
 sadness_intensity = emotional_range_model.get_emotion_intensity("sadness", stimulus_intensity, stimulus_valence)
-anger_intensity = emotional_range_model.get_emotion_intensity("anger", stimulus_intensity, stimulus_valence)
-fear_intensity = emotional_range_model.get_emotion_intensity("fear", stimulus_intensity, stimulus_valence)
-surprise_intensity = emotional_range_model.get_emotion_intensity("surprise", stimulus_intensity, stimulus_valence)
 
 # 3. TemperamentModel выбирает действие (задаем состояние вручную)
 current_state = [0.5, 0.2, 1]  # Пример вектора состояния
@@ -51,10 +82,12 @@ joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
 # Вывод результатов
 print(f"Вектор эмоционального состояния: {emotional_state.get_vector()}")
 print(f"Интенсивность радости: {joy_intensity}")
-print(f"Интенсивность грусти: {sadness_intensity}")
-print(f"Интенсивность гнева: {anger_intensity}")
-print(f"Интенсивность страха: {fear_intensity}")
-print(f"Интенсивность удивления: {surprise_intensity}")
+print(f"Интенсивность грусти: {sadness_intensity}")  # Выводим sadness
+
+# ... (вывод для других эмоций)
 print(f"Выбранное действие: {action}")
 print(f"Эмоциональная устойчивость: {emotional_stability}")
 print(f"Влияние радости на страх: {joy_influence_on_fear}")
+
+# Визуализация
+visualize_emotion_graph(emotion_graph, emotional_state)

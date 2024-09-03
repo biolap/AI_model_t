@@ -10,20 +10,25 @@ class TemperamentModel:
         self.epsilon = epsilon
         self.q_table = np.zeros((state_size, action_size))
         self.emotional_state = emotional_state
-
-    # def get_action(self, state):
-    #     if random.uniform(0, 1) < self.epsilon:
-    #         # Выбираем случайное действие
-    #         return random.randrange(self.action_size)
-    #     else:
-    #         # Выбираем действие с максимальной оценкой в Q-таблице
-    #         return np.argmax(self.q_table[state, :])
-        
+    def discretize_state(self, state, num_intervals):
+        """ Дискретизирует вектор состояния. 
+        Args: state: Вектор состояния (список непрерывных значений).
+        num_intervals: Количество интервалов для каждого элемента.
+        Returns: Кортеж дискретизированных значений (индексы интервалов).
+        """
+        discrete_state = []
+        for value in state:
+            interval_index = int(value * num_intervals)  # Вычисляем индекс интервала
+            if interval_index == num_intervals:  #  Обработка граничного случая (value = 1)
+                interval_index = num_intervals - 1
+            discrete_state.append(interval_index)
+        return tuple(discrete_state)
     def get_action(self, state):
-        state = tuple(state)  # Convert state to a tuple of integers
         if random.uniform(0, 1) < self.epsilon:
             return random.randrange(self.action_size)
-        return np.argmax(self.q_table[state, :])    
+        # Дискретизируем state
+        discrete_state = self.discretize_state(state, num_intervals=3)  
+        return np.argmax(self.q_table[discrete_state, :])
     def update_q_table(self, state, action, reward, next_state):
         # SARSA update
         current_q = self.q_table[state, action]
@@ -32,11 +37,3 @@ class TemperamentModel:
 
         new_q = current_q + self.learning_rate * (reward + self.discount_factor * next_q - current_q)
         self.q_table[state, action] = new_q
-
-        # Пример использования EmotionalState
-        joy_intensity = self.emotional_state.get_emotion_intensity(0) 
-        # ... (используйте joy_intensity для принятия решения о действии)
-
-        # Пример использования EmotionalState
-        fear_intensity = self.emotional_state.get_emotion_intensity(3) 
-        # ... (используйте fear_intensity для обновления q_table)

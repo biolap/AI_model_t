@@ -60,10 +60,10 @@ joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
 # Обучение модели
 model.train(X_train, y_train, epochs=100, batch_size=32)
 
-# Визуализация
-plt.plot(y_train, color='blue', label='Реальная эмоциональная устойчивость')
-plt.plot(model.predict_emotional_stability(X_train), color='red', label='Предсказанная эмоциональная устойчивость')
-plt.xlabel('Время')
-plt.ylabel('Эмоциональная устойчивость')
-plt.legend()
-plt.show()
+# # Визуализация
+# plt.plot(y_train, color='blue', label='Реальная эмоциональная устойчивость')
+# plt.plot(model.predict_emotional_stability(X_train), color='red', label='Предсказанная эмоциональная устойчивость')
+# plt.xlabel('Время')
+# plt.ylabel('Эмоциональная устойчивость')
+# plt.legend()
+# plt.show()

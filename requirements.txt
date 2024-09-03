@@ -3,3 +3,6 @@ fuzzylogic
 tensorflow
 networkx
 scikit-fuzzy
+scipy
+matplotlib
+plotly
