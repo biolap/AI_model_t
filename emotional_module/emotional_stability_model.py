@@ -25,7 +25,6 @@ emotional_history = [
     [1.0, 0.0, 0.5, 0.1, 0.8],  # Состояние 19
     [0.9, 0.1, 0.4, 0.2, 0.7],  # Состояние 20
 ]
-
 class EmotionalStabilityModel:
     def __init__(self, input_shape, lstm_units=32):
         self.model = keras.models.Sequential()
@@ -38,7 +37,6 @@ class EmotionalStabilityModel:
         # ... 
         prediction = self.model.predict(input_data)
         return prediction[0][0] # Возвращаем  значение от 0 до 1
-
     def train(self, X_train, y_train, epochs=100, batch_size=32):
         self.model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size)
     def prepare_data(self, emotional_history):
@@ -47,7 +45,6 @@ class EmotionalStabilityModel:
         for i in range(len(emotional_history) - 5):  # 5 - timesteps
             X.append(emotional_history[i:i+5])  # Берем 5 последних состояний
             y.append(emotional_history[i+5][0])  # Берем значение радости из следующего состояния (индекс 0)
-
         return np.array(X), np.array(y)
 # Создание обучающих данных
 input_shape = (5, 5)  # timesteps=5, features=5
@@ -56,10 +53,8 @@ model = EmotionalStabilityModel(input_shape, lstm_units)
 X_train, y_train = model.prepare_data(emotional_history)
 emotion_graph = EmotionGraph()
 joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
-
 # Обучение модели
 model.train(X_train, y_train, epochs=100, batch_size=32)
-
 # # Визуализация
 # plt.plot(y_train, color='blue', label='Реальная эмоциональная устойчивость')
 # plt.plot(model.predict_emotional_stability(X_train), color='red', label='Предсказанная эмоциональная устойчивость')

@@ -11,7 +11,7 @@ class TemperamentModel:
         self.q_table = np.zeros((state_size, action_size))
         self.emotional_state = emotional_state
     def discretize_state(self, state, num_intervals):
-        """ Дискретизирует вектор состояния. 
+        """ Дискретизирует вектор состояния.
         Args: state: Вектор состояния (список непрерывных значений).
         num_intervals: Количество интервалов для каждого элемента.
         Returns: Кортеж дискретизированных значений (индексы интервалов).

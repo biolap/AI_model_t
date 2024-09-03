@@ -3,10 +3,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 from emotional_module.temperament_model import TemperamentModel
-from emotional_module.emotional_range_model import EmotionalRangeModel 
 from emotional_module.emotional_stability_model import EmotionalStabilityModel
 from emotional_module.emotional_state import EmotionalState
 from emotional_module.emotion_graph import EmotionGraph
+from emotional_module.emotional_range_model import JoyModel, SadnessModel
 
 # Параметры для TemperamentModel
 state_size = 3
@@ -17,8 +17,9 @@ epsilon = 0.1
 
 # Создание экземпляров
 emotional_state = EmotionalState()
+joy_model = JoyModel(emotional_state)  #  Создаем экземпляр JoyModel
+sadness_model = SadnessModel(emotional_state)  #  Создаем экземпляр SadnessModel
 temperament_model = TemperamentModel(state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state)
-emotional_range_model = EmotionalRangeModel(emotional_state)
 emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 5), lstm_units=32)
 emotion_graph = EmotionGraph()
 
@@ -57,11 +58,11 @@ def visualize_emotion_graph(emotion_graph, emotional_state):
 # Пример взаимодействия
 # 1. Получение стимула (задаем вручную)
 stimulus_intensity = 0.8 
-stimulus_valence = 0.6
+stimulus_valence = -0.6
 
-# 2. EmotionalRangeModel обрабатывает стимул (только радость)
-joy_intensity = emotional_range_model.get_emotion_intensity("joy", stimulus_intensity, stimulus_valence)
-sadness_intensity = emotional_range_model.get_emotion_intensity("sadness", stimulus_intensity, stimulus_valence)
+# 2. Вычисление интенсивности эмоций
+joy_intensity = joy_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем joy_model
+sadness_intensity = sadness_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем sadness_model
 
 # 3. TemperamentModel выбирает действие (задаем состояние вручную)
 current_state = [0.5, 0.2, 1]  # Пример вектора состояния
