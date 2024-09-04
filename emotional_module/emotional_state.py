@@ -4,6 +4,7 @@ class EmotionalState:
         self.size = size
         self.vector = np.zeros(size)
         self.emotions = ["joy", "sadness", "anger", "fear", "surprise"]
+        self.history = []  #  Добавляем  атрибут  для  истории  состояний 
         #  Устанавливаем начальную интенсивность для "joy" 
         self.set_emotion_intensity(self.emotions.index("joy"), intensity)        
     def set_emotion_intensity(self, emotion_index, intensity):
@@ -18,3 +19,9 @@ class EmotionalState:
             raise ValueError("Invalid emotion index")
     def get_vector(self):
         return self.vector
+    def get_history(self):
+        """  Возвращает  историю  эмоциональных  состояний.  """
+        return self.history
+    def update_history(self):
+        """  Добавляет  текущее  состояние  в  историю.  """
+        self.history.append(self.vector.copy())  #  Добавляем  копию  вектора,  чтобы  избежать  изменений  в  истории

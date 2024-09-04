@@ -1,106 +1,64 @@
 import numpy as np
 
 from emotional_module.temperament_model import TemperamentModel
-from emotional_module.emotional_range_model import JoyModel, SadnessModel, AngerModel, FearModel, SurpriseModel
 from emotional_module.emotional_stability_model import EmotionalStabilityModel
 from emotional_module.emotional_state import EmotionalState
+from emotional_module.stimulus_model import StimulusModel
+from emotional_module.environment_model import EnvironmentModel
+from emotional_module.emotional_module import EmotionalModule
 from emotional_module.emotion_graph import EmotionGraph
-from emotional_module.visualization import visualize_emotion_graph_3d
 
-# Параметры для TemperamentModel
+#  Параметры  для  TemperamentModel
 state_size = 3
 action_size = 6
 learning_rate = 0.1
 discount_factor = 0.9
 epsilon = 0.1
 
-# Создание экземпляров
+#  Создание  экземпляров
 emotional_state = EmotionalState()
-joy_model = JoyModel(emotional_state)  #  Создаем экземпляр JoyModel
-sadness_model = SadnessModel(emotional_state)  #  Создаем экземпляр SadnessModel
-temperament_model = TemperamentModel(state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state)
-emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 5), lstm_units=32)
 emotion_graph = EmotionGraph()
+temperament_model = TemperamentModel(state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state)
+emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 5), emotion_graph=emotion_graph, lstm_units=32)
+stimulus_model = StimulusModel()
+environment_model = EnvironmentModel()
 
-# def visualize_emotion_graph(emotion_graph, emotional_state):
-#     """Визуализирует граф эмоций.
+#  Создаем  экземпляр  EmotionalModule
+emotional_module = EmotionalModule(emotional_state)
 
-#     Args:
-#         emotion_graph: Экземпляр класса EmotionGraph.
-#         emotional_state: Экземпляр класса EmotionalState.
-#     """
-#     # Получаем интенсивность эмоций из emotional_state
-#     emotion_intensities = {
-#         emotion: emotional_state.get_emotion_intensity(i) 
-#         for i, emotion in enumerate(emotion_graph.emotions)
-#     }
+#  Пример  взаимодействия
+    #  1.  Получение  стимула  (задаем  вручную)
+stimulus_intensity = 0.8
+stimulus_valence = 0.6
+for _ in range(25):  #  Цикл  для  создания  25  эмоциональных  состояний
+    #  Устанавливаем  стимул
+    stimulus_model.set_stimulus(stimulus_intensity,  stimulus_valence)
 
-#     # Создаем макет графа
-#     pos = nx.spring_layout(emotion_graph.graph)
+    #  Устанавливаем  параметры  среды
+    environment_model.set_safety("safe")
+    environment_model.set_stimulation("high")
 
-#     # Рисуем узлы с размером,  пропорциональным интенсивности эмоции
-#     node_sizes = [intensity * 1000 for intensity in emotion_intensities.values()]
-#     nx.draw_networkx_nodes(emotion_graph.graph, pos, node_size=node_sizes, node_color="lightblue")
+    # 2.  EmotionalModule  обрабатывает  стимул  
+    emotional_module.process_stimulus(stimulus_intensity,  stimulus_valence)
 
-#     # Рисуем ребра с толщиной,  пропорциональной весу
-#     edge_widths = [data['weight'] * 5 for _, _, data in emotion_graph.graph.edges(data=True)]
-#     nx.draw_networkx_edges(emotion_graph.graph, pos, width=edge_widths, edge_color="gray")
+    #  Обновляем  историю  эмоциональных  состояний
+    emotional_state.update_history()
 
-#     # Добавляем метки к узлам
-#     nx.draw_networkx_labels(emotion_graph.graph, pos, font_size=10)
-
-#     # Отображаем граф
-#     plt.title("Граф эмоций")
-#     plt.axis('off')
-#     plt.show()
-
-# Пример взаимодействия
-# 1. Получение стимула (задаем вручную)
-stimulus_intensity = 0.8 
-stimulus_valence = -0.6
-
-# 2. Вычисление интенсивности эмоций
-# joy_intensity = joy_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем joy_model
-# sadness_intensity = sadness_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)  #  Используем sadness_model
-
-joy_model = JoyModel(emotional_state)
-joy_intensity = joy_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
-
-sadness_model = SadnessModel(emotional_state)
-sadness_intensity = sadness_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
-
-anger_model = AngerModel(emotional_state)
-anger_intensity = anger_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
-
-fear_model = FearModel(emotional_state)
-fear_intensity = fear_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
-
-surprise_model = SurpriseModel(emotional_state)
-surprise_intensity = surprise_model.get_emotion_intensity(stimulus_intensity, stimulus_valence)
-
-# 3. TemperamentModel выбирает действие (задаем состояние вручную)
-current_state = [0.5, 0.2, 1]  # Пример вектора состояния
+# 3.  Взаимодействие  с  TemperamentModel
+current_state = [0.5,  0.2,  1] 
 action = temperament_model.get_action(current_state)
 
-# 4. EmotionalStabilityModel предсказывает устойчивость (задаем историю состояний вручную)
-emotional_history = [
-    [0.8, 0.2, 0.3, 0.1, 0.6],
-    [0.7, 0.3, 0.2, 0.2, 0.5],
-    [0.6, 0.4, 0.1, 0.3, 0.4],
-    [0.5, 0.5, 0.0, 0.4, 0.3],
-    [0.4, 0.6, 0.1, 0.5, 0.2],
-]
-emotional_stability = emotional_stability_model.predict_emotional_stability(np.array([emotional_history]))
-# 5. EmotionGraph определяет влияние эмоций
-joy_influence_on_fear = emotion_graph.get_influence("joy", "fear")
+# 4.  Взаимодействие  с  EmotionalStabilityModel
+emotional_history = emotional_state.get_history() 
+emotional_history = np.array(emotional_history).reshape(5, 5, 5)  #  Исправленная  форма
+emotional_stability = emotional_stability_model.predict_emotional_stability(emotional_history)
 
-# Вывод результатов
-print(f"Вектор эмоционального состояния: {emotional_state.get_vector()}")
-print(f"Интенсивность радости: {joy_intensity}")
-print(f"Интенсивность грусти: {sadness_intensity}")
-print(f"Интенсивность гнева: {anger_intensity}")
-print(f"Интенсивность страха: {fear_intensity}")
-print(f"Интенсивность удивления: {surprise_intensity}")
+# 5.  Моделирование  изменения  эмоций  со  временем  
+time_step = 0.1
+emotional_module.evolve(time_step)
 
-# Визуализация
-visualize_emotion_graph_3d(emotion_graph, emotional_state)
+#  Вывод  результатов
+print(f"Вектор  эмоционального  состояния:  {emotional_state.get_vector()}")
+print(f"Выбранное  действие:  {action}")
+print(f"Эмоциональная  устойчивость:  {emotional_stability}")
+# ...
