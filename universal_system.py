@@ -40,6 +40,18 @@ class UniversalSystem:
         self.intensity['low'] = fuzz.trimf(self.intensity.universe, [0, 0, 0.5])
         self.intensity['medium'] = fuzz.trimf(self.intensity.universe, [0.25, 0.5, 0.75])
         self.intensity['high'] = fuzz.trimf(self.intensity.universe, [0.5, 1, 1])
+    def calculate_intensity(self, simulation_name, output_variable_name, stimulus_intensity=None, stimulus_valence=None):
+        """  Универсальный  метод  для  расчета  интенсивности.  """
+        simulation = self.simulations[simulation_name]
+        if stimulus_intensity is not None:
+            simulation.input['stimulus_intensity'] = stimulus_intensity
+        if stimulus_valence is not None:
+            simulation.input['stimulus_valence'] = stimulus_valence
+        simulation.compute()
+        intensity = simulation.output[output_variable_name]
+        self.emotional_state.set_emotion_intensity(self.emotional_state.emotions.index(self.name), intensity)  #  Добавлено
+        return intensity
+        # return simulation.output[output_variable_name]
     def add_quark(self, name, value):
         self.quarks[name] = value
 

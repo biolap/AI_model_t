@@ -1,5 +1,5 @@
 from universal_system import UniversalSystem
-
+import skfuzzy as fuzz
 class JoyModel(UniversalSystem):
     def __init__(self, emotional_state):
         super().__init__("joy", emotional_state)
@@ -12,14 +12,27 @@ class JoyModel(UniversalSystem):
 
         #  Fuzzy  logic  компоненты  (уже  определены  в  UniversalSystem)
         self.add_intensity_consequent("joy_intensity")
+        # Call define_rules to initialize the simulation
+        self.define_rules() 
 
-        #  Правила
-        super().add_rule("joy", self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['high'])  #  Исправлено
-        super().add_rule("joy", self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['medium'])  #  Исправлено
-        super().add_rule("joy", self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low'])  #  Исправлено
-        super().add_rule("joy", self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['low'])  #  Исправлено
-        super().add_rule("joy", self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['low'])  #  Исправлено
-        super().add_rule("joy", self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low'])  #  Исправлено
+        # #  Правила
+        # super().add_rule("joy", self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['high'])
+        # super().add_rule("joy", self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['medium'])
+        # super().add_rule("joy", self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low'])
+        # super().add_rule("joy", self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['very_low'])  #  Изменено
+        # super().add_rule("joy", self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['very_low'])  #  Изменено
+        # super().add_rule("joy", self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['very_low'])   #  Изменено
+
+    def define_rules(self):
+        #  Добавьте  fuzzy-множество  'very_low'  для  self.intensity
+        self.intensity['very_low'] = fuzz.trimf(self.intensity.universe, [0, 0, 0.25])
+
+        super().add_rule("joy", self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['high'])
+        super().add_rule("joy", self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['medium'])
+        super().add_rule("joy", self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low'])
+        super().add_rule("joy", self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['very_low'])  
+        super().add_rule("joy", self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['very_low'])
+        super().add_rule("joy", self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['very_low'])
 
         #  Создание  симуляции
         super().set_simulation("joy", self.rules["joy"])  #  Исправлено
@@ -29,7 +42,8 @@ class JoyModel(UniversalSystem):
             stimulus_valence = other_system.leptons["valence"]
             #  Изменяем  интенсивность  радости  на  основе  стимула
             if stimulus_valence > 0:
-                self.leptons["intensity"] = self.calculate_intensity("joy", "joy_intensity")
+                stimulus_intensity = other_system.leptons["intensity"]
+                self.leptons["intensity"] = self.calculate_intensity("joy", "joy_intensity", stimulus_intensity, stimulus_valence)  #  Добавлено
             else:
                 self.leptons["intensity"] = 0.0
         #  Гравитационное  взаимодействие  (пример  с  "средой")

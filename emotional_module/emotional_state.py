@@ -7,11 +7,19 @@ class EmotionalState:
         self.history = []  #  Добавляем  атрибут  для  истории  состояний 
         #  Устанавливаем начальную интенсивность для "joy" 
         self.set_emotion_intensity(self.emotions.index("joy"), intensity)        
+    # def set_emotion_intensity(self, emotion_index, intensity):
+    #     if 0 <= emotion_index < self.size:
+    #         self.vector[emotion_index] = intensity
+    #     else:
+    #         raise ValueError("Invalid emotion index")
+        
     def set_emotion_intensity(self, emotion_index, intensity):
         if 0 <= emotion_index < self.size:
             self.vector[emotion_index] = intensity
+            print(f"Установка  интенсивности  для  индекса  {emotion_index}  (эмоция:  {self.emotions[emotion_index]}):  {intensity}")  #  Отладочный  вывод
         else:
             raise ValueError("Invalid emotion index")
+    
     def get_emotion_intensity(self, emotion_index):
         if 0 <= emotion_index < self.size:
             return self.vector[emotion_index]
