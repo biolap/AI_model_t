@@ -1,4 +1,3 @@
-import numpy as np
 import random
 
 from emotional_module.temperament_model import TemperamentModel
@@ -10,7 +9,7 @@ from emotional_module.emotional_module import EmotionalModule
 from emotional_module.emotion_graph import EmotionGraph
 
 #  Параметры  для  TemperamentModel
-state_size = 3
+state_size = 6
 action_size = 6
 learning_rate = 0.1
 discount_factor = 0.9
@@ -19,8 +18,12 @@ epsilon = 0.1
 #  Создание  экземпляров
 emotional_state = EmotionalState()
 emotion_graph = EmotionGraph()
-temperament_model = TemperamentModel(state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state)
-emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 5), emotion_graph=emotion_graph, lstm_units=32)
+temperament_model = TemperamentModel(state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state, emotion_graph)
+emotional_stability_model = EmotionalStabilityModel(input_shape=(25, 36),  # Correct input_shape
+                                                    emotion_graph=emotion_graph, 
+                                                    emotional_state=emotional_state, 
+                                                    lstm_units=32)
+
 stimulus_model = StimulusModel()
 environment_model = EnvironmentModel()
 
@@ -32,32 +35,29 @@ for _ in range(25):  #  Цикл  для  создания  25  эмоциона
     #  1.  Получение  стимула  (задаем  вручную,  с  вариативностью)
     stimulus_intensity = random.uniform(0, 1)  #  Случайная  интенсивность
     stimulus_valence = random.uniform(-1, 1)  #  Случайная  валентность
-
-    #  1.  Получение  стимула  (задаем  вручную)
-# stimulus_intensity = 0.8
-# stimulus_valence = 0.6
-# for _ in range(25):  #  Цикл  для  создания  25  эмоциональных  состояний
-#     #  Устанавливаем  стимул
-#     stimulus_model.set_stimulus(stimulus_intensity,  stimulus_valence)
+    
+    print(f"Интенсивность  стимула:  {stimulus_intensity},  валентность:  {stimulus_valence}")  #  Добавлен  вывод
 
     #  Устанавливаем  параметры  среды
     environment_model.set_safety("safe")
     environment_model.set_stimulation("high")
 
     # 2.  EmotionalModule  обрабатывает  стимул  
-emotional_module.process_stimulus(stimulus_intensity,  stimulus_valence)
-
+    emotional_module.process_stimulus(stimulus_intensity,  stimulus_valence)
+    
+    #  Обновляем  EmotionGraph  
+    emotional_module.update_emotion_graph()  #  Добавлено
+    
     #  Обновляем  историю  эмоциональных  состояний
-emotional_state.update_history()
+    emotional_state.update_history()
 
 # 3.  Взаимодействие  с  TemperamentModel
 current_state = [0.5,  0.2,  1] 
 action = temperament_model.get_action(current_state)
 
 # 4.  Взаимодействие  с  EmotionalStabilityModel
-emotional_history = emotional_state.get_history() 
-emotional_history = np.array(emotional_history).reshape(5, 5, 5)
-emotional_stability = emotional_stability_model.predict_emotional_stability(emotional_history)
+X_train, y_train = emotional_stability_model.prepare_data(emotional_state.get_history())  #  Получаем  данные  из  prepare_data
+emotional_stability = emotional_stability_model.predict_emotional_stability(X_train)  #  Передаем  X_train  в  predict_emotional_stability
 
 # 5.  Моделирование  изменения  эмоций  со  временем  
 time_step = 0.1

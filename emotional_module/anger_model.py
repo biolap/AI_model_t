@@ -15,13 +15,6 @@ class AngerModel(UniversalSystem):
         # Call define_rules to initialize the simulation
         self.define_rules() 
 
-        # #  Правила
-        # super().add_rule("anger", self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['high'])
-        # super().add_rule("anger", self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['medium'])
-        # super().add_rule("anger", self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low'])
-        # super().add_rule("anger", self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['low'])
-        # super().add_rule("anger", self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['low'])
-        # super().add_rule("anger", self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low'])
     def define_rules(self):
         #  Добавьте  fuzzy-множество  'very_low'  для  self.intensity
         self.intensity['very_low'] = fuzz.trimf(self.intensity.universe, [0, 0, 0.25]) 
@@ -38,7 +31,6 @@ class AngerModel(UniversalSystem):
     def interact(self, other_system):
         #  Электромагнитное  взаимодействие
         if other_system.name == "Stimulus":
-            stimulus_intensity = other_system.leptons["intensity"]  #  Используется  косвенно  в  calculate_intensity
             stimulus_valence = other_system.leptons["valence"]
 
             if stimulus_valence < 0:  #  Гнев  усиливается  только  при  отрицательной  валентности
