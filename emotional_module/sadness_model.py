@@ -14,13 +14,6 @@ class SadnessModel(UniversalSystem):
         self.add_intensity_consequent("sadness_intensity")
         # Call define_rules to initialize the simulation
         self.define_rules()
-        # #  Правила
-        # super().add_rule("sadness", self.stimulus_intensity['high'] & self.stimulus_valence['negative'], self.intensity['high'])
-        # super().add_rule("sadness", self.stimulus_intensity['medium'] & self.stimulus_valence['negative'], self.intensity['medium'])
-        # super().add_rule("sadness", self.stimulus_intensity['low'] & self.stimulus_valence['negative'], self.intensity['low'])
-        # super().add_rule("sadness", self.stimulus_intensity['high'] & self.stimulus_valence['positive'], self.intensity['low'])
-        # super().add_rule("sadness", self.stimulus_intensity['medium'] & self.stimulus_valence['positive'], self.intensity['low'])
-        # super().add_rule("sadness", self.stimulus_intensity['low'] & self.stimulus_valence['positive'], self.intensity['low'])
     def define_rules(self):
         #  Добавьте  fuzzy-множество  'very_low'  для  self.intensity
         self.intensity['very_low'] = fuzz.trimf(self.intensity.universe, [0, 0, 0.25]) 

@@ -19,11 +19,8 @@ epsilon = 0.1
 emotional_state = EmotionalState()
 emotion_graph = EmotionGraph()
 temperament_model = TemperamentModel(state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state, emotion_graph)
-emotional_stability_model = EmotionalStabilityModel(input_shape=(25, 36),  # Correct input_shape
-                                                    emotion_graph=emotion_graph, 
-                                                    emotional_state=emotional_state, 
-                                                    lstm_units=32)
-
+# emotional_stability_model = EmotionalStabilityModel(input_shape=(25, 36), emotion_graph=emotion_graph, emotional_state=emotional_state, lstm_units=32)
+emotional_stability_model = EmotionalStabilityModel(input_shape=(5, 36), emotion_graph=emotion_graph, emotional_state=emotional_state, lstm_units=32)
 stimulus_model = StimulusModel()
 environment_model = EnvironmentModel()
 

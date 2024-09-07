@@ -41,8 +41,7 @@ class TemperamentModel:
 
         sadness_intensity = self.emotional_state.get_emotion_intensity(1)
         q_values[1:4] -= sadness_intensity * 0.3 
-        
-        q_values = self.q_table[state_index, :].copy() 
+        q_values = self.q_table[state_index, :] 
 
         #  ---  Примеры  влияния  эмоций  на  выбор  действия  ---
 
@@ -110,5 +109,5 @@ class TemperamentModel:
         self.q_table[state, action] = new_q
         
     def get_state_index(self, discrete_state, num_intervals):
-        """  Преобразует  кортеж  индексов  в  одно  число  (индекс  состояния).  """
+        """ Преобразует кортеж индексов в одно число (индекс состояния). """
         return sum(value * (num_intervals ** i) for i, value in enumerate(discrete_state))
