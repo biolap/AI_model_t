@@ -72,7 +72,7 @@ class EmotionalStabilityModel:
         # 3. Dense слой для обработки матрицы весов EmotionGraph
         self.model.add(keras.layers.Input(shape=(self.num_emotions, self.num_emotions))) 
         self.model.add(keras.layers.Flatten()) 
-        self.model.add(keras.layers.Dense(self.num_emotions * self.num_emotions, activation='relu'))
+        self.model.add(keras.layers.Dense(self.num_emotions ** 2, activation='relu'))
 
         # 4. Объединяем выходы всех слоев
         self.model.add(keras.layers.Concatenate())
@@ -123,8 +123,7 @@ class EmotionalStabilityModel:
         # Преобразование истории эмоций в нужную форму для LSTM
         emotional_history = np.array(emotional_history).reshape(1, self.input_shape[0], self.num_emotions)  
         # Создание списка входных данных для модели
-        input_data = [emotional_history, current_emotional_state, emotion_graph_weights]  
-        return input_data
+        return [emotional_history, current_emotional_state, emotion_graph_weights]
     
     def generate_training_data(self, num_samples):
         """ Генерирует искусственный набор данных для обучения.
