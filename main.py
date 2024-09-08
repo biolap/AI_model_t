@@ -1,7 +1,6 @@
 import  random
 import  time
 import  numpy  as  np
-from  transliterate  import  translit
 
 from  emotional_module.temperament_model  import  TemperamentModel
 from  emotional_module.emotional_stability_model  import  EmotionalStabilityModel
@@ -32,12 +31,6 @@ def  run_experiment(experiment_name,  lstm_units,  epochs,  batch_size,  num_ite
     with  open(filename,  'w')  as  f:
         #  Запись  заголовков  столбцов
         f.write("Iteration,Stimulus Intensity,Stimulus Valence,joy,sadness,anger,fear,surprise,disgust,Action,Emotional Stability,Time\n")
-
-        # #  Запись  описания  действий
-        # f.write(translit(
-        #     "Описание  действий:  0  -  Выразить  радость,  1  -  Проявить  грусть,  2  -  Проявить  гнев,  3  -  Избегать  опасности,  4  -  Взаимодействовать  с  объектом,  5  -  Не  выражать  эмоций",
-        #     'ru',  reversed=True
-        # )  +  "\n")
 
         #  Генерация  обучающих  данных  для  EmotionalStabilityModel
         num_training_samples = 1000
