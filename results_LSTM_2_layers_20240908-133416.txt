@@ -1,0 +1,2 @@
+Iteration,Stimulus Intensity,Stimulus Valence,Joy,Sadness,Anger,Fear,Surprise,Disgust,Action,Emotional Stability,Time
+Action description:  0 - Выразить  радость,  1 - Проявить  грусть,  2 - Проявить  гнев, 3 - Избегать  опасности,  4 - Взаимодействовать  с  объектом,  5 - Не  выражать  эмоций

@@ -1,3 +1,114 @@
+# import numpy as np
+# import random
+
+# class TemperamentModel:
+#     def __init__(self, state_size, action_size, learning_rate, discount_factor, epsilon, emotional_state, emotion_graph):
+#         self.state_size = state_size
+#         self.action_size = action_size
+#         self.learning_rate = learning_rate
+#         self.discount_factor = discount_factor
+#         self.epsilon = epsilon
+#         self.emotion_graph = emotion_graph
+#         self.q_table = np.zeros(((3 ** state_size), action_size))
+#         self.emotional_state = emotional_state
+
+#     def discretize_state(self, state, num_intervals):
+#         """ Дискретизирует вектор состояния.
+
+#         Args:
+#             state: Вектор состояния (список непрерывных значений).
+#             num_intervals: Количество интервалов для каждого элемента.
+
+#         Returns:
+#             Кортеж дискретизированных значений (индексы интервалов).
+#         """
+#         discrete_state = []
+#         for value in state:
+#             interval_index = int(value * num_intervals)  
+#             if interval_index == num_intervals:  
+#                 interval_index = num_intervals - 1
+#             discrete_state.append(interval_index)
+#         return tuple(discrete_state)
+
+#     def get_action(self, state):
+#         print("----- Debugging TemperamentModel.get_action -----")
+#         print(f"Current state: {state}")
+#         if random.uniform(0, 1) < self.epsilon:
+#             return random.randrange(self.action_size)
+
+#         discrete_state = self.discretize_state(state, num_intervals=3)
+#         state_index = self.get_state_index(discrete_state, num_intervals=3)
+#         q_values = self.q_table[state_index, :]
+#         print(f"Q-values before emotion modification: {q_values}")
+
+#         #  ---  Примеры  влияния  эмоций  на  выбор  действия  ---
+
+#         #  0 - Выразить  радость
+#         #  1 - Проявить  грусть
+#         #  2 - Проявить  гнев
+#         #  3 - Избегать  опасности
+#         #  4 - Взаимодействовать  с  объектом
+#         #  5 - Не  выражать  эмоций
+
+#         #  1.  Радость:  усиливаем  желание  выразить  радость  и  ослабляем  негативные  эмоции
+#         joy_intensity = self.emotional_state.get_emotion_intensity(0)
+#         q_values[0] += joy_intensity * 0.5  
+#         q_values[2] -= joy_intensity * 0.3  
+#         q_values[3] -= joy_intensity * 0.4  
+#         q_values[5] -= joy_intensity * 0.2  
+
+#         #  2.  Грусть:  ослабляем  желание  действовать  активно  и  усиливаем  страх
+#         sadness_intensity = self.emotional_state.get_emotion_intensity(1)
+#         q_values[:4] -= sadness_intensity * 0.3 
+#         q_values[3] += sadness_intensity * 0.5 
+
+#         #  3.  Гнев:  усиливаем  желание  проявить  агрессию  и  ослабляем  страх
+#         anger_intensity = self.emotional_state.get_emotion_intensity(2)
+#         q_values[2] += anger_intensity * 0.7  
+#         q_values[3] -= anger_intensity * 0.4  
+
+#         #  4.  Страх:  усиливаем  желание  избегать  опасности  и  ослабляем  радость
+#         fear_intensity = self.emotional_state.get_emotion_intensity(3)
+#         q_values[3] += fear_intensity * 0.8  
+#         q_values[0] -= fear_intensity * 0.2  
+
+#         #  5.  Удивление:  делаем  выбор  действия  более  случайным
+#         surprise_intensity = self.emotional_state.get_emotion_intensity(4)
+#         self.epsilon += surprise_intensity * 0.2
+        
+#         print(f"Q-values after emotion modification: {q_values}")
+#         print(f"Selected action: {np.argmax(q_values)}")
+#         print("-----------------------------------------------------\n")
+
+#         #  6.  Отвращение:  ослабляем  желание  взаимодействовать  с  объектом  и  усиливаем  гнев
+#         disgust_intensity = self.emotional_state.get_emotion_intensity(5)
+#         q_values[4] -= disgust_intensity * 0.6  
+#         q_values[2] += disgust_intensity * 0.3
+
+#         #  ---  Примеры  влияния  EmotionGraph  на  выбор  действия  ---
+
+#         for i, emotion1 in enumerate(self.emotional_state.emotions):
+#             for j, emotion2 in enumerate(self.emotional_state.emotions):
+#                 if i != j:
+#                     influence = self.emotion_graph.get_influence(emotion1, emotion2)
+#                     emotion1_intensity = self.emotional_state.get_emotion_intensity(i)
+#                     q_values[j] += influence * emotion1_intensity * q_values[j]
+
+#         return np.argmax(q_values)    
+
+#     def update_q_table(self, state, action, reward, next_state):
+#         #  SARSA update
+#         current_q = self.q_table[state, action]
+#         next_action = self.get_action(next_state)
+#         next_q = self.q_table[next_state, next_action]
+
+#         new_q = current_q + self.learning_rate * (reward + self.discount_factor * next_q - current_q)
+#         self.q_table[state, action] = new_q
+        
+#     def get_state_index(self, discrete_state, num_intervals):
+#         """  Преобразует  кортеж  индексов  в  одно  число  (индекс  состояния).  """
+#         return sum(value * (num_intervals ** i) for i, value in enumerate(discrete_state))
+
 import numpy as np
 import random
 
@@ -9,102 +120,46 @@ class TemperamentModel:
         self.discount_factor = discount_factor
         self.epsilon = epsilon
         self.emotion_graph = emotion_graph
-        self.q_table = np.zeros(((3 ** state_size), action_size))
         self.emotional_state = emotional_state
+        #  Изменение:  размер  Q-таблицы  зависит  от  количества  возможных  дискретных  состояний
+        self.q_table = np.zeros(((3 ** state_size), action_size)) 
 
-    def discretize_state(self, state, num_intervals):
-        """ Дискретизирует вектор состояния.
-
-        Args:
-            state: Вектор состояния (список непрерывных значений).
-            num_intervals: Количество интервалов для каждого элемента.
-
-        Returns:
-            Кортеж дискретизированных значений (индексы интервалов).
-        """
+    def discretize_state(self, state, num_intervals=3):
+        """  Дискретизирует  вектор  состояния.  """
         discrete_state = []
-        for value in state:
-            interval_index = int(value * num_intervals)  
-            if interval_index == num_intervals:  
+        for  value  in  state:
+            interval_index = int(value * num_intervals)
+            if  interval_index == num_intervals:
                 interval_index = num_intervals - 1
             discrete_state.append(interval_index)
-        return tuple(discrete_state)
+        return  tuple(discrete_state)
 
     def get_action(self, state):
-        print("----- Debugging TemperamentModel.get_action -----")
-        print(f"Current state: {state}")
+        """  Выбирает  действие  на  основе  Q-таблицы  и  epsilon-жадности.  """
         if random.uniform(0, 1) < self.epsilon:
+            #  Исследование:  выбираем  случайное  действие
             return random.randrange(self.action_size)
-
-        discrete_state = self.discretize_state(state, num_intervals=3)
-        state_index = self.get_state_index(discrete_state, num_intervals=3)
-        q_values = self.q_table[state_index, :]
-        print(f"Q-values before emotion modification: {q_values}")
-
-        #  ---  Примеры  влияния  эмоций  на  выбор  действия  ---
-
-        #  0 - Выразить  радость
-        #  1 - Проявить  грусть
-        #  2 - Проявить  гнев
-        #  3 - Избегать  опасности
-        #  4 - Взаимодействовать  с  объектом
-        #  5 - Не  выражать  эмоций
-
-        #  1.  Радость:  усиливаем  желание  выразить  радость  и  ослабляем  негативные  эмоции
-        joy_intensity = self.emotional_state.get_emotion_intensity(0)
-        q_values[0] += joy_intensity * 0.5  
-        q_values[2] -= joy_intensity * 0.3  
-        q_values[3] -= joy_intensity * 0.4  
-        q_values[5] -= joy_intensity * 0.2  
-
-        #  2.  Грусть:  ослабляем  желание  действовать  активно  и  усиливаем  страх
-        sadness_intensity = self.emotional_state.get_emotion_intensity(1)
-        q_values[:4] -= sadness_intensity * 0.3 
-        q_values[3] += sadness_intensity * 0.5 
-
-        #  3.  Гнев:  усиливаем  желание  проявить  агрессию  и  ослабляем  страх
-        anger_intensity = self.emotional_state.get_emotion_intensity(2)
-        q_values[2] += anger_intensity * 0.7  
-        q_values[3] -= anger_intensity * 0.4  
-
-        #  4.  Страх:  усиливаем  желание  избегать  опасности  и  ослабляем  радость
-        fear_intensity = self.emotional_state.get_emotion_intensity(3)
-        q_values[3] += fear_intensity * 0.8  
-        q_values[0] -= fear_intensity * 0.2  
-
-        #  5.  Удивление:  делаем  выбор  действия  более  случайным
-        surprise_intensity = self.emotional_state.get_emotion_intensity(4)
-        self.epsilon += surprise_intensity * 0.2
         
-        print(f"Q-values after emotion modification: {q_values}")
-        print(f"Selected action: {np.argmax(q_values)}")
-        print("-----------------------------------------------------\n")
-
-        #  6.  Отвращение:  ослабляем  желание  взаимодействовать  с  объектом  и  усиливаем  гнев
-        disgust_intensity = self.emotional_state.get_emotion_intensity(5)
-        q_values[4] -= disgust_intensity * 0.6  
-        q_values[2] += disgust_intensity * 0.3
-
-        #  ---  Примеры  влияния  EmotionGraph  на  выбор  действия  ---
-
-        for i, emotion1 in enumerate(self.emotional_state.emotions):
-            for j, emotion2 in enumerate(self.emotional_state.emotions):
-                if i != j:
-                    influence = self.emotion_graph.get_influence(emotion1, emotion2)
-                    emotion1_intensity = self.emotional_state.get_emotion_intensity(i)
-                    q_values[j] += influence * emotion1_intensity * q_values[j]
-
-        return np.argmax(q_values)    
+        else:
+            #  Эксплуатация:  выбираем  действие  с  максимальной  оценкой
+            discrete_state = self.discretize_state(state)
+            state_index = self.get_state_index(discrete_state)
+            return np.argmax(self.q_table[state_index, :])
 
     def update_q_table(self, state, action, reward, next_state):
-        #  SARSA update
-        current_q = self.q_table[state, action]
+        """  Обновляет  Q-таблицу  по  алгоритму  SARSA.  """
+        discrete_state = self.discretize_state(state)
+        discrete_next_state = self.discretize_state(next_state)
+        state_index = self.get_state_index(discrete_state)
+        next_state_index = self.get_state_index(discrete_next_state)
         next_action = self.get_action(next_state)
-        next_q = self.q_table[next_state, next_action]
 
+        #  SARSA  update
+        current_q = self.q_table[state_index, action]
+        next_q = self.q_table[next_state_index, next_action]
         new_q = current_q + self.learning_rate * (reward + self.discount_factor * next_q - current_q)
-        self.q_table[state, action] = new_q
-        
-    def get_state_index(self, discrete_state, num_intervals):
-        """  Преобразует  кортеж  индексов  в  одно  число  (индекс  состояния).  """
+        self.q_table[state_index, action] = new_q
+
+    def get_state_index(self, discrete_state, num_intervals=3):
+        """  Преобразует  дискретное  состояние  в  индекс  в  Q-таблице.  """
         return sum(value * (num_intervals ** i) for i, value in enumerate(discrete_state))
