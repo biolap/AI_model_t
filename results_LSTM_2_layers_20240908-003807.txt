@@ -1,1 +1,0 @@
-Iteration,Stimulus Intensity,Stimulus Valence,Emotional State,Action,Emotional Stability,Time

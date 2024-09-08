@@ -402,3 +402,4 @@ __pycache__/
 .idea/
 credentials.py
 .trunk/
+temp/

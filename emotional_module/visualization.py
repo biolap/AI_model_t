@@ -114,7 +114,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def visualize_emotion_graph(emotion_graph, emotional_state):
+def visualize_emotion_graph(emotion_graph, emotional_state, action_size):
     """Визуализирует граф эмоций.
 
     Args:
