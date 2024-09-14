@@ -21,7 +21,8 @@ def  run_experiment(experiment_name,  lstm_units,  epochs,  batch_size,  num_ite
     #  Создание  экземпляров
     emotional_state = EmotionalState()
     emotion_graph = EmotionGraph()
-    temperament_model = TemperamentModel(state_size,  action_size,  learning_rate,  discount_factor,  epsilon,  emotional_state,  emotion_graph)
+    # temperament_model = TemperamentModel(state_size,  action_size,  learning_rate,  discount_factor,  epsilon,  emotional_state,  emotion_graph)
+    temperament_model = TemperamentModel(state_size,  action_size,  learning_rate,  discount_factor,  epsilon,  emotional_state,  emotion_graph,  num_intervals=5)
     emotional_stability_model = EmotionalStabilityModel(input_shape=(5,  6),  emotion_graph=emotion_graph,  emotional_state=emotional_state,  lstm_units=lstm_units)
     stimulus_model = StimulusModel()
     environment_model = EnvironmentModel()
@@ -112,6 +113,7 @@ def  run_experiment(experiment_name,  lstm_units,  epochs,  batch_size,  num_ite
             print(f"Selected  Action:  {action}")
             print(f"Emotional  Stability:  {emotional_stability:.4f}")
             print(f"Iteration  Time:  {elapsed_time:.4f}\n")
+            print(temperament_model.q_table)
 
     print(f"The  results  are  saved  to  a  file:  {filename}")
 
@@ -120,7 +122,7 @@ state_size = 3
 action_size = 6
 learning_rate = 0.1
 discount_factor = 0.9
-epsilon = 0.1
+epsilon = 0.3
 
 #  Спецификация  экспериментальной  модели
 experiment_name = "LSTM_2_layers"
